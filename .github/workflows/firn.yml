@@ -19,14 +19,14 @@ jobs:
       - name: Print working directory
         run: pwd
       - name: List contents
-        run: find /home/runner/work/caro401.github.io/caro401.github.io
+        run: find /home/runner/work/caro401.github.io/caro401.github.io/src
       - name: Build with firn
-        run: firn build -d /home/runner/work/caro401.github.io/caro401.github.io
+        run: firn build -d /home/runner/work/caro401.github.io/caro401.github.io/src
       - name: Upload build artifacts
         uses: actions/upload-artifact@v1
         with:
           name: public
-          path: "_firn/_site"
+          path: "src/_firn/_site"
 
   deploy:
     runs-on: ubuntu-latest
