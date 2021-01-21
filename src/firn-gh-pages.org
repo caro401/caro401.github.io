@@ -1,0 +1,25 @@
+#+TITLE: Firn and GitHub Pages 
+#+DATE_CREATED: [2021-01-21]
+#+ROAM_TAGS: meta 
+
+So, I rewrote the website. I didn't write for a while, because pandemic and other life circumstances, during which time Sapper broke itself, and I decided that rather than fixing my build, I should re-write the whole thing in a different static site generator.
+
+That static site generator is [[https://firn.theiceshelf.com/][firn]], which is pretty new and shiny. It particularly caught my eye because it uses all the skills I use at work:
+
+- Clojure
+- [[https://github.com/weavejester/hiccup][hiccup]] for templating the pages, 
+- [[https://orgmode.org/][Org mode]] for the words, and it plays nicely with [[https://www.orgroam.com/][org-roam]] (more on that later)
+- (and a bit of CSS) 
+
+Although firn is new, Clojure projects tend to be spectacularly stable, so I fully expect this not to break catastrophically if I leave it alone for a bit, and if it does break, I know the language and ecosystem well enough to have some hope of fixing it. I know just about enough JavaScript to be dangerous, and don't particularly enjoy it, so even if the new firn site does break, that's more fun.
+
+There's a very tiny bit of JavaScript - [[https://prismjs.com/][Prism]] for doing code syntax highlighting, but this is not code I ever intend to touch. I'm using a slightly modified version of the [[https://github.com/PrismJS/prism-themes][Material Dark]] theme with it. 
+
+** Deployment
+
+I've also moved from GitLab to GitHub, mostly because I did the same in my job. This means new deployment scripts and a new URL. The documentation around GitHub pages is pretty good if you just want to do a Jekyll site, but less so if you want to go off the beaten track. Thankfully, I found someone else who has been building with firn and ++stole++ borrowed their configuration (from [[https://github.com/exp2exp/exp2exp.github.io/blob/master/.github/workflows/src-build.yml][this repo]]). This works really nicely (and really fast!) if...
+
+- you remember to tell GitHub to serve pages from the =gh-pages= branch, because this is what the =actions-gh-pages= thing does 
+- you haven't been "clever" and put your image assets in [[https://git-lfs.github.com/][git lfs]], because then GitHub tries to serve up the reference file rather than the image asset (see [[https://github.com/git-lfs/git-lfs/issues/1342][this issue]]).
+
+This is all open source, so feel free to go look at my [[https://github.com/caro401/caro401.github.io/blob/main/.github/workflows/firn.yml][workflow configuration]] and tell me how to do it better.
