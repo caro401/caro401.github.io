@@ -1,5 +1,7 @@
 code[class*="language-"],
 pre[class*="language-"] {
+	color: #bbc2cf;
+	background:  #1c1e24;
 	text-align: left;
 	white-space: pre;
 	word-spacing: normal;

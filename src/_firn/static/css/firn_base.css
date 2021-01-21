@@ -192,7 +192,7 @@ h5,
 h6 {
   margin: 1em 0;
   font-weight: bolder;
-  color: var(--ts-clr);
+  color: var(--clr-string);
 
 }
 
@@ -465,7 +465,7 @@ color: var(--clr-preprocessor);
 
 
 .firn-internal {
-	color: var(--clr-linkv);
+	color: var(--clr-link);
 }
 
 /* If you choose to render :PROPERTIES: drawers, you may style them: */
@@ -603,7 +603,6 @@ p.frontmatter {
   justify-content: flex-start;
   padding: 8px 0px;
   height: var(--nav-height);
-  /* position: sticky; */
   top: 0;
   width: 100%;
   z-index: 2;
@@ -612,6 +611,5 @@ p.frontmatter {
 
 .nav-links-item {
   padding: 0 8px;
-  font-size: small;
   color: var(--clr-function);
 }
