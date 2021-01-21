@@ -16,12 +16,10 @@ jobs:
         run: curl -s https://raw.githubusercontent.com/theiceshelf/firn/master/install -o install-firn
       - name: Install firn
         run: chmod +x install-firn && sudo ./install-firn
-      - name: Print working directory
-        run: pwd
-      - name: List contents
-        run: find /home/runner/work/caro401.github.io/caro401.github.io/src
       - name: Build with firn
         run: firn build -d /home/runner/work/caro401.github.io/caro401.github.io/src
+      - name: validate output
+        run: cat src/_firn/_site/index.html
       - name: Upload build artifacts
         uses: actions/upload-artifact@v1
         with:
@@ -42,3 +40,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
+          destination_dir: output
