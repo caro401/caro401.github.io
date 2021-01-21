@@ -3,8 +3,6 @@ name: Firn
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   build:
@@ -18,13 +16,9 @@ jobs:
         run: chmod +x install-firn && sudo ./install-firn
       - name: Build with firn
         run: firn build -d /home/runner/work/caro401.github.io/caro401.github.io/src
-      - name: validate output
-        run: cat src/_firn/_site/index.html
-      - name: please don't delete all my files
-        run: mv src/_firn/_site ./public  
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
+          publish_dir: ./src/_firn/_site
           exclude_assets: '.github,**/.gitignore'
