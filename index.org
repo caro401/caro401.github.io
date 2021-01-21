@@ -1,0 +1,4 @@
+#+TITLE: Home
+#+FIRN_LAYOUT: index
+#+FIRN_SITEMAP?: false
+

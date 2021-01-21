@@ -1,0 +1,149 @@
+#+TITLE: git Toolkit
+#+DATE_CREATED: [2020-05-17]
+#+ROAM_TAGS: git
+
+[[https://git-scm.com/][git]] is both really useful and really horrible to use, and can be completely overwhelming when you first start with it. There's so many commands, many of which you only use very occasionally, if you are doing something particularly complex or you made a mess and need to fix it. This all makes getting started with git a bit tricky. I have a bunch of friends who are learning programming right now, and struggled to find a way to show the small corner of git that I actually use regularly. So here it is.
+
+** Starting on a new project
+
+#+BEGIN_SRC sh
+git clone https://gitlab.com/something/my-project.git && cd my-project
+#+END_SRC
+
+This /clones/ (something like downloading, but also bringing history) a git repository from the URL you pass (in this case called =my-project= and coming from [[https://gitlab.com/][GitLab]]), and then moves you into that directory. I often used to forget the second bit and then get confused, so now I tend to stick it on the end of the =clone= command.
+
+Using a HTTPS URL tends to be simpler for new programmers than using SSH, as it means you can just use your credentials later on, rather than having to worry about setting up an SSH key for the service you are using. However, if you want to do that, GitLab has some [[https://docs.gitlab.com/ee/ssh/][great docs]] on how to do it.
+
+** Starting some work
+
+Before doing this, make sure you are on the master branch and don't have any local changes. You can find this out by running
+
+#+BEGIN_SRC bash
+git status
+#+END_SRC
+
+and if everything is good, the output will look like:
+
+#+BEGIN_SRC shell-session
+$ git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+#+END_SRC
+
+If you've waited a while before starting work, you probably want to make sure your local repository is up to date, and that you have all the work that other people have done on the project in the mean time. So run:
+
+#+BEGIN_SRC bash
+git pull
+#+END_SRC
+
+to update your local copy with things that have been changed by other people. Assuming you haven't made any changes yet, this should /just work/.
+
+So, now you want to add a feature or fix a bug or something. How does that work? Probably you don't want to just commit everything straight to =master= - this will likely make the maintainer sad. So, let's make a new /branch/ where we can do the work - think of this kind of like a separate workspace based on the current state of master. This looks like:
+
+#+BEGIN_SRC bash
+git checkout -b feature/10-shiny-new-feature
+#+END_SRC
+
+So, =checkout= is how you make git move to a new branch. Since you want to move to a branch that doesn't yet exist, you need to use the =-b= flag to create that branch. I tend to give my branches quite long names, similar to how we name things at work. The first bit is either feature or bugfix, depending on what type of work is being done. The next is a ticket number (if applicable) - so you can link the work with the ticket that made it happen, and vice versa. The last bit is a short description of what the work will be, since I don't always remember what a ticket number actually means.
+
+Now you can actually do the work!
+
+** When you've done some work
+
+Now the corner of git you need to care about is the idea of a /commit/ - think of this like saving a checkpoint of your work. I tend to commit quite often, whenever some meaningful chunk of work is done (regardless of whether the thing is complete or working).
+
+First, make sure the changes that git can see are what you expect - back to
+
+#+BEGIN_SRC bash
+git status
+#+END_SRC
+
+There's two kinds of change you can expect to see - either you've changed an existing file, or you've made a new file. Here's an example of both of these, from what the git history of this website looks like just now:
+
+#+BEGIN_SRC shell-session
+$ git status
+On branch feature/git-words
+
+Changes not staged for commit:
+    (use "git add <file>..." to update what will be committed)
+    (use "git restore <file>..." to discard changes in working directory)
+    modified:   static/global.css
+
+Untracked files:
+    (use "git add <file>..." to include in what will be committed)
+    content/git-toolkit/
+#+END_SRC
+
+So, git has seen that I've made changes to =global.css=, and added some new files in the directory =content/git-toolkit=. That's what I expected, so now I can tell git that these are the changes I will want to save. This means I need to run
+
+#+BEGIN_SRC bash
+git add .
+#+END_SRC
+
+Here =.= means the current working directory, but you can think of it like "add all the things". Check this did what you expected like
+
+#+BEGIN_SRC shell-session
+$ git status
+On branch feature/git-words
+
+Changes to be committed:
+    (use "git restore --staged <file>..." to unstage)
+    new file:   content/git-toolkit/index.md
+    modified:   static/global.css
+#+END_SRC
+
+I'm paranoid so tend to also check now that the individual changes are what I expected, and if not go back and fix them before committing. You can see this with
+
+#+BEGIN_SRC bash
+git diff --staged
+#+END_SRC
+
+This will open then changes you have made compared to the last commit inside [[https://en.wikipedia.org/wiki/Less_(Unix)][=less=]] in your terminal, and you can scroll through them with arrow keys and quit with =q=. Again, sanity check that these are what you expected. Then you can "save" these changes as a chunk of work with a description.
+
+#+BEGIN_SRC bash
+git commit -m "Did some work"
+#+END_SRC
+
+So, this tells git to save this work, with the label that you provide. Try to write something slightly more descriptive than this example! Repeat the steps from this section until you are done implementing the feature or bugfix.
+
+** Share the work
+
+So you've done some work, and made some commits on your branch (with helpful messages to explain what you've done), and your feature is ready to go. Now you can run
+
+#+BEGIN_SRC bash
+git push
+#+END_SRC
+
+to "upload" this work to the shared repository on GitLab or whatever. Almost certainly git will give you an error if its the first time you pushed to this branch - it will look like this:
+
+#+BEGIN_SRC shell-session
+$ git push
+fatal: The current branch feature/some-work has no upstream branch.
+To push the current branch and set the remote as upstream, use
+
+    git push --set-upstream origin feature/some-work
+#+END_SRC
+
+Thankfully, git also tells you how to fix it - just run the command it tells you to (or run [[https://github.com/nvbn/thefuck][fuck]]!).
+
+If you are working on GitLab, the output from pushing will include a URL to allow you to make a "merge request", which is a way to ask the project maintainer to add your code back into the master branch of the project, so it actually gets used. Click this URL and fill in the details in your browser. You will probably get review comments, in which case you can go back and fix them like in the previous section, then push them to your existing branch. Once the maintainer is happy, they will approve your merge request and merge your code into master. YAY!
+
+** ...and repeat
+
+So now your feature is done and merged and you want to start something new. Go back to the master branch, and update it to get your changes, and any changes made by other people while you were working on your thing.
+
+#+BEGIN_SRC bash
+git checkout master && git pull
+#+END_SRC
+
+Note that this time there's no =-b= with the checkout - this is because master already exists, you don't need to create it.
+
+Now you can go back to [[starting-some-work][work]] and do it all again!
+
+** When stuff goes wrong
+
+Sometimes things go wrong with git - maybe you get a merge conflict when you pull, or you added something you shouldn't to a commit. At this point, I (and basically all other developers I know) resort to reading the output that git gives you (actually helpful sometimes!) and googling. THIS IS OK.
+
+My other favourite resource for these situations is [[https://wizardzines.com/zines/oh-shit-git/][Oh Shit, Git!]] by Julia Evans. I have a well-thumbed copy in my desk drawer and turn to it often. Generally, all the stuff from [[https://wizardzines.com/][wizardzines]] is AMAZING, I highly recommend all the zines.

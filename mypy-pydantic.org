@@ -1,0 +1,74 @@
+#+TITLE: Making MyPy play nice with Pydantic
+#+DATE_CREATED: [2020-07-10]
+#+DATE_UPDATED: [2021-01-21]
+#+ROAM_TAGS: python
+
+I ran into a problem at work today that I was /sure/ I had seen before, but had forgotten what the fix was, so this time I'm writing it down.
+
+I'm really enjoying using [[https://pydantic-docs.helpmanual.io/][Pydantic]] at the moment to help with validating the shape of inputs to some of my functions, and allowing me to define some data structures (called "models") that my brain can think of as types for use in my code. It will also throw errors at runtime if you try to construct a pydantic model from something that doesn't fit the type.
+
+However, the company also tries to use native Python type hints, and is starting to actually check them using [[https://mypy.readthedocs.io/en/stable/][MyPy]]. Turns out, if you have a Pydantic model, i.e. something that inherits from =pydantic.BaseModel=, MyPy fails the typechecking, with an error that looks like =src/my_file.py:12: error: Class cannot subclass 'BaseModel' (has type 'Any')=. But I know that =BaseModel= doesn't have type =Any= and so does [[https://www.jetbrains.com/pycharm/][PyCharm]], so why doesn't MyPy?
+
+Turns out, there's a plugin for MyPy to fix this. It's documented pretty well in the [[https://pydantic-docs.helpmanual.io/mypy_plugin/][Pydantic docs]] (which are awesome!), but I failed to read them, and wasn't pointed there when I tried googling my error messages. So, I needed to add a config file for MyPy, and add this plugin:
+
+#+BEGIN_SRC ini
+# mypy.ini
+[mypy]
+plugins = pydantic.mypy
+
+[pydantic-mypy]
+init_forbid_extra = True
+init_typed = True
+warn_required_dynamic_aliases = True
+warn_untyped_fields = True
+#+END_SRC
+
+The first section adds the plugin, and the second turns on some options to make the checking even more strict. See [[https://pydantic-docs.helpmanual.io/mypy_plugin/#plugin-settings][the Pydantic docs]] for what these settings actually do.
+
+So now the MyPy settings are in place, if I run the type checker again, I get an error that Pydantic isn't installed. This is true, since we run MyPy from a stripped-down [[https://tox.readthedocs.io/en/latest/][tox]] environment with only the linter, formatters and MyPy itself installed. Let's fix that. The relevant section of the (really rather long) =tox.ini= file needs to look like:
+
+#+BEGIN_SRC ini
+[base]
+lint_targets = src tests
+
+[testenv:lint]
+description = Lint using black, flake8 and isort. Type-check using Mypy.
+deps =
+    black
+    flake8
+    isort
+    mypy
+    pydantic # add this! or put it in a requirements.txt and install from there
+commands =
+    isort --check-only --diff {[base]lint_targets}
+    black --check --diff {[base]lint_targets}
+    flake8 {[base]lint_targets}
+    mypy --ignore-missing-imports --strict {toxinidir}/src
+    mypy --ignore-missing-imports {toxinidir}/tests/unit
+#+END_SRC
+
+And yay! everything works!
+
+** Afterword
+
+This section of =tox.ini= includes a couple of my favourite Python tools, which I thought might be worth a mention:
+
+- [[https://black.readthedocs.io/en/stable/][black]] for automatically formatting code. I don't love the style of the formatting it does, but I absolutely do love the lack of configurability - I have better things to do with my day than argue with my team about formatting
+  conventions.
+- [[https://readthedocs.org/projects/isort/][isort]] for sorting your import statements. This has a million configuration options, but the company has a default set to use so I personally don't have to think about it. While PyCharm can do this, not everyone on my team uses it,
+  and I often forget to run formatting anyways, so having something that will just fix things is great.
+
+Basically, I'm a fan of anything that can automatically fix silly mistakes I make, and get code written by many people into a consistent style without arguments. We actually have a tox environment to do this fixing for us, with the relevant section of =tox.ini= looking like
+
+#+BEGIN_SRC ini
+[testenv:autoformat]
+description = Autoformat all Python files using isort and black.
+deps =
+    black
+    isort[pyproject]
+commands =
+    isort {[base]lint_targets}
+    black --verbose {[base]lint_targets}
+#+END_SRC
+
+Personally I'd rather this was a [[https://git-scm.com/docs/githooks][pre-commit hook]] so I couldn't forget to run it, but that's a problem for another day.

@@ -1,0 +1,16 @@
+#+TITLE: Pretty git Log
+#+DATE_CREATED: [2020-05-17]
+#+ROAM_TAGS: shell git
+
+I have an alias (=glp=) saved in my shell for making a pretty git log.
+
+#+BEGIN_SRC bash
+git log --graph --abbrev-commit --decorate --format=format:"%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(auto)%d%C(reset)%n%C(white)%s%C(reset)%C(dim white)- %an%C(reset)"
+#+END_SRC
+
+I honestly don't care what all the bits do, and stole the line from [[https://stackoverflow.com/a/9074343][stack overflow]], but I use it a lot.
+
+It looks like:
+
+#+CAPTION: A screenshot of my terminal showing git log
+[[file:data/glp.png]]
