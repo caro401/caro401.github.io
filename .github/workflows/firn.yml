@@ -20,24 +20,8 @@ jobs:
         run: firn build -d /home/runner/work/caro401.github.io/caro401.github.io/src
       - name: validate output
         run: cat src/_firn/_site/index.html
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v1
-        with:
-          name: public
-          path: "src/_firn/_site"
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    if: success() && github.ref == 'refs/heads/main'
-    steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v1
-        with:
-          name: public
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
-          destination_dir: output
+          publish_dir: src/_firn/_site
